@@ -26,4 +26,4 @@ Exchange Mail Server 2013		: Version 15.0.1293.2 [CU 16]
 - Validation service
 1. Ensure all exchange service and dependencies component is running
 2. Test send and receive mail from internal 
-3. Test send and receive mail from externel [not tested cause on this poc using lab environment]
+3. Test send and receive mail from external [not tested cause on this poc using lab environment]
