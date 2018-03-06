@@ -1,0 +1,13 @@
+# Case
+One of the users does not receive email between local users, check and trace log on local mail transfer protocol via ems
+
+# Command to check via exchange management shell
+Get-MessageTrackingLog -ResultSize Unlimited -Start "3/5/2018 08:00AM" -End "3/5/2018 5:00PM" -Sender "sender@xxx.co.id" -Recipient "recipient@xxx.co.id"
+
+Get-MessageTrackingLog -ResultSize Unlimited -Start "3/5/2018 08:00AM" -End "3/5/2018 5:00PM" -Sender "sender@xxx.co.id" -Recipient "recipient@xxx.co.id" | fl
+
+# Check delivery report via EAC under mail flow featured pane
+# Check message tracking via manual under path log folder
+C:\Program Files\Microsoft\Exchange Server\V15\TransportRoles\Logs\MessageTracking
+
+validate that email is send, check and verified from owa access
