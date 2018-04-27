@@ -1,0 +1,47 @@
+- Open cmd or powershell console
+- Type "netdom query fsmo" without quotes to verify all roles on dc 
+C:\Users\Administrator.RECTOVERSO>netdom query fsmo
+Schema master               ad-1.rectoverso.com
+Domain naming master        ad-1.rectoverso.com
+PDC                         ad-1.rectoverso.com
+RID pool manager            ad-1.rectoverso.com
+Infrastructure master       ad-1.rectoverso.com
+The command completed successfully.
+
+- Type "ntdsutil" then enter -- follow the instructions below -- in here i want to transfer RID pool manager from ad-1 to ad-2
+C:\Users\Administrator.RECTOVERSO>ntdsutil
+ntdsutil: roles
+fsmo maintenance: connections
+server connections: connect to server ad-2
+Binding to ad-2 ...
+Connected to ad-2 using credentials of locally logged on user.
+server connections: quit
+fsmo maintenance: seize rid master      ---> enter, then will prompt pop up confirmation and select option yes
+Attempting safe transfer of RID FSMO before seizure.
+FSMO transferred successfully - seizure not required.
+Server "ad-2" knows about 5 roles
+Schema - CN=NTDS Settings,CN=AD-1,CN=Servers,CN=Default-First-Site-Name,CN=Sites
+,CN=Configuration,DC=rectoverso,DC=com
+Naming Master - CN=NTDS Settings,CN=AD-1,CN=Servers,CN=Default-First-Site-Name,C
+N=Sites,CN=Configuration,DC=rectoverso,DC=com
+PDC - CN=NTDS Settings,CN=AD-1,CN=Servers,CN=Default-First-Site-Name,CN=Sites,CN
+=Configuration,DC=rectoverso,DC=com
+RID - CN=NTDS Settings,CN=AD-2,CN=Servers,CN=Default-First-Site-Name,CN=Sites,CN
+=Configuration,DC=rectoverso,DC=com
+Infrastructure - CN=NTDS Settings,CN=AD-1,CN=Servers,CN=Default-First-Site-Name,
+CN=Sites,CN=Configuration,DC=rectoverso,DC=com
+fsmo maintenance: quit
+ntdsutil: quit
+
+- okay, to verify that role is moved. Type "netdom query fsmo" without quotes -- the rid master is moved to ad-2
+C:\Users\Administrator.RECTOVERSO>netdom query fsmo
+Schema master               ad-1.rectoverso.com
+Domain naming master        ad-1.rectoverso.com
+PDC                         ad-1.rectoverso.com
+RID pool manager            ad-2.rectoverso.com
+Infrastructure master       ad-1.rectoverso.com
+The command completed successfully.
+
+
+
+
