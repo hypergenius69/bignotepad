@@ -1,0 +1,44 @@
+heat_template_version: 2013-05-23
+description: Test Stack Default
+
+parameters:
+  ServerName:
+    type: string
+    description: A name for the server
+    default: instancepertama
+  Image:
+    type: string
+    description: Image ID used to boot the server
+    default: cirros
+  Flavor:
+    type: string
+    description: Flavor of server
+    default: m1.tiny
+  Net:
+    type: string
+    description: Network ID for the server
+    default: private
+  VolumeName:
+    type: string
+    description: A name for the volume
+    default: myvolume
+
+resources:
+  serversatu:
+    type: OS::Nova::Server
+    properties:
+      name: { get_param: ServerName }
+      image: { get_param: Image }
+      flavor: { get_param: Flavor }
+      networks:
+      - network: { get_param: Net }
+  volumesatu:
+    type: OS::Cinder::Volume
+    properties:
+      name: { get_param: VolumeName }
+      size: 1
+  volumeattachsatu:
+    type: OS::Cinder::VolumeAttachment
+    properties:
+	volume_id: { get_resource: volumesatu }
+      instance_uuid: { get_resource: serversatu}
