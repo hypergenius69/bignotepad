@@ -1,0 +1,86 @@
+#!/bin/bash
+# IPTABLES Allow All Public 
+
+# Define Paramaters
+LOCAL_IP=10.0.0.0/8,172.16.0.0/16,192.168.0.0/24,103.252.50.6/32,103.252.50.22/32,103.252.50.209/32
+PUBLIC=0.0.0.0/0
+PINGDOM=5.172.196.188,5.178.78.77,23.22.2.46,23.111.152.74,27.122.14.7,37.252.231.50,43.225.198.122,43.229.84.12,46.20.45.18,46.165.195.139,50.16.153.186,50.22.90.227,50.23.94.74,52.0.204.16,52.24.42.103,52.48.244.35,52.52.34.158,52.52.95.213,52.52.118.192,52.57.132.90,52.59.46.112,52.59.147.246,52.62.12.49,52.63.142.2,52.63.164.147,52.63.167.55,52.67.148.55,52.73.209.122,52.89.43.70,52.197.31.124,52.197.224.235,52.198.25.184,52.201.3.199,52.209.34.226,52.209.186.226,52.210.232.124,54.68.48.199,54.70.202.58,54.94.206.111,64.120.6.122,64.237.49.203,64.237.55.3,67.228.213.178,69.59.28.19,70.32.40.2,72.46.130.42,72.46.140.106,72.46.153.26,76.72.167.90,76.72.167.154,76.72.172.208,76.164.194.74,82.103.136.16,82.103.139.165,83.170.113.210,85.17.156.11,85.17.156.76,85.93.93.123,85.93.93.124,85.93.93.133,89.163.146.247,89.163.242.206,94.247.174.83,95.141.32.46,95.211.198.87,95.211.217.68,96.31.66.245,103.47.211.210,108.62.115.226,109.123.101.103,138.219.43.186,143.255.57.118,159.8.146.132,162.218.67.34,168.1.92.58,173.248.147.18,173.254.206.242,174.34.156.130,174.34.162.242,174.34.224.167,175.45.132.20,178.255.152.2,178.255.153.2,178.255.154.2,178.255.155.2,179.50.12.212,184.75.208.210,184.75.209.18,184.75.210.90,184.75.210.226,184.75.214.66,185.39.146.214,185.39.146.215,185.70.76.23,188.138.40.20,188.172.252.34,199.87.228.66,201.33.21.5,204.152.200.42,207.244.80.239,208.43.68.59,208.64.28.194,209.126.117.87,209.126.120.29,211.44.63.35
+VPLS_POS_NETWORK=10.32.0.0/16
+EXCEPTION=61.19.0.0/16,5.41.0.0/16
+OUTLOOK_MOBILE=40.69.141.82
+GOOGLE_MAIL=209.85.215.19,209.85.128.0/17
+
+# Clear rules
+iptables -F
+iptables -X
+iptables -t nat -F
+iptables -t mangle -F
+
+iptables -X
+iptables -t nat -X
+iptables -t mangle -X
+echo - Clear rules : [DONE]
+
+iptables -P INPUT ACCEPT
+iptables -P OUTPUT ACCEPT
+iptables -P FORWARD ACCEPT
+
+# Allow loopback
+iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+iptables -A INPUT -i lo -j ACCEPT
+echo - Loopback : [OK]
+
+# Allow ICMP
+iptables -A INPUT -p icmp -j ACCEPT
+iptables -A OUTPUT -p icmp -j ACCEPT
+echo - ICMP : [OK]
+
+# Allow ICMP from Pingdom Network Monitoring Tools
+iptables -A INPUT -s $PINGDOM -p icmp -j ACCEPT
+echo - Allow ICMP Pingdom : [OK]
+
+
+# Accept tcp packets on destination port 22 (SSH) from private LAN
+iptables -A INPUT -p tcp -s $LOCAL_IP --dport 22 -j ACCEPT
+echo - SSH : [OK]
+
+# Allow from private local network
+iptables -A INPUT -s $LOCAL_IP -j ACCEPT
+echo - Allow private local networks : [OK]
+
+# Allow HTTPS from Pingdom Network Monitoring Tools
+iptables -A INPUT -s $PINGDOM -p tcp --dport 443 -j ACCEPT
+echo - Allow HTTPS Pingdom : [OK]
+
+
+# Allow Conns from VPLS POS Networks
+iptables -A INPUT -s $VPLS_POS_NETWORK -p tcp -m multiport --dports 25,80,110,143,443,465,587,993,995 -j ACCEPT
+echo - Allow Conns from VPLS POS Networks : [OK]
+
+# Allow multiports
+#iptables -A INPUT -p tcp -m multiport --dports 25,465,587 -j ACCEPT 
+#iptables -A INPUT -p tcp -m multiport --dports 110,995,143,993 -j ACCEPT
+#iptables -A INPUT -p tcp -m multiport --dports 80,443 -j ACCEPT
+
+# IP Exception for Customers
+#iptables -A INPUT -s $EXCEPTION -p tcp -m multiport --dports 80,443,465,587,993,995 -j ACCEPT
+#iptables -A INPUT -s $OUTLOOK_MOBILE -p tcp -m multiport --dports 80,443,465,587,993,995 -j ACCEPT
+#iptables -A INPUT -s $GOOGLE_MAIL -p tcp -m multiport --dports 80,443,465,587,993,995 -j ACCEPT
+#iptables -A INPUT -s $SAUDI_CIDR -p tcp -m multiport --dports 80,443,465,587,993,995 -j ACCEPT
+
+#echo - IP Exception for Customers : [OK]
+
+# Allow from Public
+iptables -A INPUT -s $PUBLIC -p tcp -m multiport --dports 80,443,465,587,993,995 -j ACCEPT
+echo - Allow from Public : [OK]
+
+# Block All
+iptables -A INPUT -s 0.0.0.0/0 -j REJECT
+echo - Drop from Unknown : [DONE]
+
+# Firewall Save & Restart
+/sbin/iptables-save > /etc/sysconfig/iptables
+echo - Firewall Save : [OK]
+service iptables restart
+echo - Firewall Restart : [OK]
+
