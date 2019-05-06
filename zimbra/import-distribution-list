@@ -1,4 +1,0 @@
-/opt/zimbra/bin/zmprov cdl test-dl@example.com
-/opt/zimbra/bin/zmprov adlm test-dl@example.com user1@example.com
-/opt/zimbra/bin/zmprov adlm test-dl@example.com user2@example.com
-/opt/zimbra/bin/zmprov adlm test-dl@example.com user3@example.com
